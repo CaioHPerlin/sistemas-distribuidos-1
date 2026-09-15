@@ -13,7 +13,7 @@
   "keywords": [],
   "author": "Caio H Perlin & Caio R Loyer",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/CaioHPerlin/sistemas-distribuidos-1/issues"
   },
