@@ -9,6 +9,7 @@ interface SensorReading {
 abstract class MockOscillator {
   private _id: string;
   private _type: string;
+  private _unit: string;
   private _min: number;
   private _max: number;
   private _step: number;
@@ -18,11 +19,13 @@ abstract class MockOscillator {
   protected constructor(
     id: string,
     type: string,
+    unit: string,
     min: number,
     max: number,
     step: number,
   ) {
     this._id = id;
+    this._unit = unit;
     this._type = type;
     this._min = min;
     this._max = max;
@@ -44,7 +47,9 @@ abstract class MockOscillator {
     return this._type;
   }
 
-  abstract getUnit(): string;
+  getUnit(): string{
+    return this._unit;
+  };
 
   read(): SensorReading {
     return {
