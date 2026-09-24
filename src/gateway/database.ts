@@ -1,8 +1,13 @@
 import { mkdirSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
-import type { Averages } from '../microservice/protocol.js'
 import type { SensorUnits } from '../sensors/protocol.js'
+
+export interface Averages {
+  temperature: number
+  humidity: number
+  rainfall: number
+}
 
 /** Banco local de uma instância do gateway. */
 export class GatewayDatabase {

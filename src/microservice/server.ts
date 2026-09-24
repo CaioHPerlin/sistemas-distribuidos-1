@@ -1,10 +1,25 @@
 import { createServer } from 'node:net'
 import { readArgs } from '../common/args.js'
-import type { AverageRequest, AverageResponse, Averages } from './protocol.js'
-import { isAverageRequest } from './protocol.js'
 
-function average(readings: AverageRequest['readings'], key: keyof Averages): number {
-  const mean = readings.reduce((total, reading) => total + reading[key] / readings.length, 0)
+/** Cada grupo de números produz uma média na mesma posição da resposta. */
+export interface Input {
+  groups: number[][]
+}
+
+export interface Output {
+  averages: number[]
+}
+
+function isInput(value: unknown): value is Input {
+  if (!value || typeof value !== 'object') return false
+  const input = value as Partial<Input>
+  return Array.isArray(input.groups) &&
+    input.groups.length > 0 &&
+    input.groups.every((group) => Array.isArray(group) && group.length > 0 && group.every(Number.isFinite))
+}
+
+function average(values: number[]): number {
+  const mean = values.reduce((total, value) => total + value, 0) / values.length
   return Number(mean.toFixed(2))
 }
 
@@ -26,18 +41,12 @@ function main(): void {
         message = undefined
       }
 
-      if (!isAverageRequest(message)) {
+      if (!isInput(message)) {
         socket.end()
         return
       }
 
-      const response: AverageResponse = {
-        averages: {
-          temperature: average(message.readings, 'temperature'),
-          humidity: average(message.readings, 'humidity'),
-          rainfall: average(message.readings, 'rainfall'),
-        },
-      }
+      const response: Output = { averages: message.groups.map(average) }
       socket.end(JSON.stringify(response))
     })
     socket.on('error', (error) => console.error(`[médias] ${error.message}`))

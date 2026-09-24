@@ -1,9 +1,9 @@
 import { createConnection } from 'node:net'
 import { readArgs } from '../common/args.js'
-import type { AverageRequest, AverageResponse } from '../microservice/protocol.js'
+import type { Input, Output } from '../microservice/server.js'
 import type { SensorReading } from '../sensors/protocol.js'
 import { isSensorReading } from '../sensors/protocol.js'
-import { GatewayDatabase } from './database.js'
+import { GatewayDatabase, type Averages } from './database.js'
 
 interface Address {
   host: string
@@ -61,32 +61,47 @@ class Gateway {
     const first = readings[0]
     if (!first) return
 
-    const request: AverageRequest = { readings }
+    const request: Input = {
+      groups: [
+        readings.map((reading) => reading.temperature),
+        readings.map((reading) => reading.humidity),
+        readings.map((reading) => reading.rainfall),
+      ],
+    }
     const socket = createConnection(this.service)
     socket.on('connect', () => socket.write(JSON.stringify(request)))
     socket.on('data', (data: Buffer) => {
-      let response: AverageResponse
+      let response: Output
       try {
-        response = JSON.parse(data.toString('utf8')) as AverageResponse
+        response = JSON.parse(data.toString('utf8')) as Output
       } catch {
         console.error(`[gateway:${this.ports}] resposta inválida do serviço`)
         socket.destroy()
         return
       }
 
-      if (!response || !response.averages) {
+      if (!response || !Array.isArray(response.averages)) {
         console.error(`[gateway:${this.ports}] resposta inválida do serviço`)
         socket.destroy()
         return
       }
 
+      const [temperature, humidity, rainfall] = response.averages
+      if (typeof temperature !== 'number' || typeof humidity !== 'number' || typeof rainfall !== 'number') {
+        console.error(`[gateway:${this.ports}] resposta inválida do serviço`)
+        socket.destroy()
+        return
+      }
+
+      const averages: Averages = { temperature, humidity, rainfall }
+
       try {
-        this.database.save(label, readings.length, response.averages, first.units)
+        this.database.save(label, readings.length, averages, first.units)
         console.log(
           `[gateway:${this.ports}] talhão ${label}: ${readings.length} leituras, ` +
-            `${response.averages.temperature} ${first.units.temperature}, ` +
-            `${response.averages.humidity} ${first.units.humidity}, ` +
-            `${response.averages.rainfall} ${first.units.rainfall}`,
+            `${averages.temperature} ${first.units.temperature}, ` +
+            `${averages.humidity} ${first.units.humidity}, ` +
+            `${averages.rainfall} ${first.units.rainfall}`,
         )
       } catch (error) {
         console.error(`[gateway:${this.ports}] erro ao salvar: ${error}`)
