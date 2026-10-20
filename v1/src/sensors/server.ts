@@ -33,10 +33,12 @@ function main(): void {
     socket.on('close', () => { client = undefined })
     socket.on('error', (error) => console.error(`[talhão:${port}] ${error.message}`))
   })
+
   server.on('error', (error) => {
     console.error(`[talhão:${port}] ${error.message}`)
     process.exitCode = 1
   })
+
   server.listen(port, () => {
     console.log(`[talhão:${port}] ouvindo na porta ${port}`)
     setInterval(() => {

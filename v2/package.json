@@ -1,0 +1,30 @@
+{
+  "name": "sistemas-distribuidos-1",
+  "version": "1.0.0",
+  "description": "",
+  "engines": {
+    "node": ">=24.15.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start:sensors": "node dist/sensors/server.js",
+    "start:gateway": "node dist/gateway/main.js",
+    "start:microservice": "node dist/microservice/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CaioHPerlin/sistemas-distribuidos-1.git"
+  },
+  "keywords": [],
+  "author": "Caio H Perlin & Caio R Loyer",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/CaioHPerlin/sistemas-distribuidos-1/issues"
+  },
+  "homepage": "https://github.com/CaioHPerlin/sistemas-distribuidos-1#readme",
+  "devDependencies": {
+    "@types/node": "^22.20.4",
+    "typescript": "^7.0.2"
+  }
+}
