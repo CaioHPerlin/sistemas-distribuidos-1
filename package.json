@@ -2,9 +2,14 @@
   "name": "sistemas-distribuidos-1",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "engines": {
+    "node": ">=24.15.0"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "start:sensors": "node dist/sensors/server.js",
+    "start:gateway": "node dist/gateway/main.js",
+    "start:microservice": "node dist/microservice/server.js"
   },
   "repository": {
     "type": "git",
@@ -19,7 +24,7 @@
   },
   "homepage": "https://github.com/CaioHPerlin/sistemas-distribuidos-1#readme",
   "devDependencies": {
-    "@types/node": "^22.20.2",
+    "@types/node": "^22.20.4",
     "typescript": "^7.0.2"
   }
 }
