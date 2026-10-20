@@ -40,7 +40,9 @@ class Gateway {
 
       this.addReading(label, reading)
     })
-    socket.on('error', (error) => console.error(`[gateway:${this.ports}] talhão ${label}: ${error.message}`))
+    socket.on('error', (error) =>
+      console.error(`[gateway:${this.ports}] talhão ${label}: ${error.message}`),
+    )
     socket.on('close', () => {
       console.log(`[gateway:${this.ports}] reconectando ao talhão ${label} em 2 s`)
       setTimeout(() => this.connectToTalhao(address), 2_000)
@@ -87,7 +89,11 @@ class Gateway {
       }
 
       const [temperature, humidity, rainfall] = response.averages
-      if (typeof temperature !== 'number' || typeof humidity !== 'number' || typeof rainfall !== 'number') {
+      if (
+        typeof temperature !== 'number' ||
+        typeof humidity !== 'number' ||
+        typeof rainfall !== 'number'
+      ) {
         console.error(`[gateway:${this.ports}] resposta inválida do serviço`)
         socket.destroy()
         return
@@ -149,7 +155,10 @@ function main(): void {
     talhoes.push(address)
   }
 
-  const ports = talhoes.map((address) => address.port).sort((a, b) => a - b).join('-')
+  const ports = talhoes
+    .map((address) => address.port)
+    .sort((a, b) => a - b)
+    .join('-')
   const database = new GatewayDatabase(`data/gateway-${ports}.sqlite`)
   console.log(`[gateway:${ports}] médias armazenadas em ${database.path}`)
   const gateway = new Gateway(ports, service, batchSize, database)

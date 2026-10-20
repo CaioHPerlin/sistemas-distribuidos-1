@@ -9,7 +9,6 @@ export interface Averages {
   rainfall: number
 }
 
-/** Banco local de uma instância do gateway. */
 export class GatewayDatabase {
   private readonly db: DatabaseSync
 
@@ -33,21 +32,25 @@ export class GatewayDatabase {
   }
 
   save(address: string, sampleCount: number, averages: Averages, units: SensorUnits): void {
-    this.db.prepare(`
+    this.db
+      .prepare(
+        `
       INSERT INTO averages
         (talhao_address, calculated_at, sample_count,
          temperature, temperature_unit, humidity, humidity_unit, rainfall, rainfall_unit)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      address,
-      new Date().toISOString(),
-      sampleCount,
-      averages.temperature,
-      units.temperature,
-      averages.humidity,
-      units.humidity,
-      averages.rainfall,
-      units.rainfall,
-    )
+    `,
+      )
+      .run(
+        address,
+        new Date().toISOString(),
+        sampleCount,
+        averages.temperature,
+        units.temperature,
+        averages.humidity,
+        units.humidity,
+        averages.rainfall,
+        units.rainfall,
+      )
   }
 }

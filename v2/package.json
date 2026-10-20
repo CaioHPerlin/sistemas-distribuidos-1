@@ -9,7 +9,8 @@
     "build": "tsc",
     "start:sensors": "node dist/sensors/server.js",
     "start:gateway": "node dist/gateway/main.js",
-    "start:microservice": "node dist/microservice/server.js"
+    "start:microservice": "node dist/microservice/server.js",
+    "format": "prettier --write src/**/*.{ts,js,tsx,jsx}"
   },
   "repository": {
     "type": "git",

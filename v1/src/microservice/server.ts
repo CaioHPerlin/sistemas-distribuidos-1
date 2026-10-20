@@ -13,9 +13,13 @@ export interface Output {
 function isInput(value: unknown): value is Input {
   if (!value || typeof value !== 'object') return false
   const input = value as Partial<Input>
-  return Array.isArray(input.groups) &&
+  return (
+    Array.isArray(input.groups) &&
     input.groups.length > 0 &&
-    input.groups.every((group) => Array.isArray(group) && group.length > 0 && group.every(Number.isFinite))
+    input.groups.every(
+      (group) => Array.isArray(group) && group.length > 0 && group.every(Number.isFinite),
+    )
+  )
 }
 
 function average(values: number[]): number {

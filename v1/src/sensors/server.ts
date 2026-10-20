@@ -12,7 +12,13 @@ function main(): void {
   })
   const port = Number(args.port)
   const intervalMs = Number(args['interval-ms'])
-  if (!Number.isInteger(port) || port < 1 || port > 65535 || !Number.isInteger(intervalMs) || intervalMs < 100) {
+  if (
+    !Number.isInteger(port) ||
+    port < 1 ||
+    port > 65535 ||
+    !Number.isInteger(intervalMs) ||
+    intervalMs < 100
+  ) {
     console.error('Uso: sensors --port=<porta> [--interval-ms=<milissegundos, mínimo 100>]')
     process.exitCode = 1
     return
@@ -30,7 +36,9 @@ function main(): void {
     }
 
     client = socket
-    socket.on('close', () => { client = undefined })
+    socket.on('close', () => {
+      client = undefined
+    })
     socket.on('error', (error) => console.error(`[talhão:${port}] ${error.message}`))
   })
 
