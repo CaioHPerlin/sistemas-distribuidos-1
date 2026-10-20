@@ -1,12 +1,17 @@
 import { createServer, type Socket } from 'node:net'
-import { readArgs } from '../common/args.js'
+import { parseArgs } from 'node:util'
 import { HumiditySensor, RainGaugeSensor, TemperatureSensor } from './sensors.js'
 import type { SensorReading } from './protocol.js'
 
 function main(): void {
-  const args = readArgs()
+  const { values: args } = parseArgs({
+    options: {
+      port: { type: 'string' },
+      'interval-ms': { type: 'string', default: '1000' },
+    },
+  })
   const port = Number(args.port)
-  const intervalMs = Number(args['interval-ms'] || '1000')
+  const intervalMs = Number(args['interval-ms'])
   if (!Number.isInteger(port) || port < 1 || port > 65535 || !Number.isInteger(intervalMs) || intervalMs < 100) {
     console.error('Uso: sensors --port=<porta> [--interval-ms=<milissegundos, mínimo 100>]')
     process.exitCode = 1

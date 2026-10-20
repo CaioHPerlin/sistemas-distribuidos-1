@@ -1,5 +1,5 @@
 import { createConnection } from 'node:net'
-import { readArgs } from '../common/args.js'
+import { parseArgs } from 'node:util'
 import type { Input, Output } from '../microservice/server.js'
 import type { SensorReading } from '../sensors/protocol.js'
 import { isSensorReading } from '../sensors/protocol.js'
@@ -121,10 +121,16 @@ function parseAddress(text: string): Address | undefined {
 }
 
 function main(): void {
-  const args = readArgs()
+  const { values: args } = parseArgs({
+    options: {
+      service: { type: 'string' },
+      lots: { type: 'string' },
+      'batch-size': { type: 'string', default: '5' },
+    },
+  })
   const service = parseAddress(args.service || '')
   const lotsText = args.lots
-  const batchSize = Number(args['batch-size'] || '5')
+  const batchSize = Number(args['batch-size'])
   const usage = 'Uso: gateway --service=<[host:]porta> --lots=<[host:]porta,...> [--batch-size=5]'
   if (!service || !lotsText || !Number.isInteger(batchSize) || batchSize < 1) {
     console.error(usage)

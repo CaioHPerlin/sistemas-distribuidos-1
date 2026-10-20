@@ -1,5 +1,5 @@
 import { createServer } from 'node:net'
-import { readArgs } from '../common/args.js'
+import { parseArgs } from 'node:util'
 
 /** Cada grupo de números produz uma média na mesma posição da resposta. */
 export interface Input {
@@ -24,8 +24,12 @@ function average(values: number[]): number {
 }
 
 function main(): void {
-  const args = readArgs()
-  const port = Number(args.port || '4000')
+  const { values: args } = parseArgs({
+    options: {
+      port: { type: 'string', default: '4000' },
+    },
+  })
+  const port = Number(args.port)
   if (!Number.isInteger(port) || port < 1 || port > 65535) {
     console.error('Uso: microservice [--port=<porta, padrão 4000>]')
     process.exitCode = 1
