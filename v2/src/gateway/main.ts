@@ -20,7 +20,7 @@ class Gateway {
     private readonly database: GatewayDatabase,
   ) {}
 
-  connectToTalhao(address: Address): void {
+  connectToPlot(address: Address): void {
     const label = `${address.host}:${address.port}`
     const socket = createConnection(address)
     socket.on('connect', () => console.log(`[gateway:${this.ports}] conectado ao talhão ${label}`))
@@ -45,7 +45,7 @@ class Gateway {
     )
     socket.on('close', () => {
       console.log(`[gateway:${this.ports}] reconectando ao talhão ${label} em 2 s`)
-      setTimeout(() => this.connectToTalhao(address), 2_000)
+      setTimeout(() => this.connectToPlot(address), 2_000)
     })
   }
 
@@ -144,7 +144,7 @@ function main(): void {
     return
   }
 
-  const talhoes: Address[] = []
+  const plots: Address[] = []
   for (const text of lotsText.split(',')) {
     const address = parseAddress(text)
     if (!address) {
@@ -152,17 +152,17 @@ function main(): void {
       process.exitCode = 1
       return
     }
-    talhoes.push(address)
+    plots.push(address)
   }
 
-  const ports = talhoes
+  const ports = plots
     .map((address) => address.port)
     .sort((a, b) => a - b)
     .join('-')
   const database = new GatewayDatabase(`data/gateway-${ports}.sqlite`)
   console.log(`[gateway:${ports}] médias armazenadas em ${database.path}`)
   const gateway = new Gateway(ports, service, batchSize, database)
-  for (const address of talhoes) gateway.connectToTalhao(address)
+  for (const address of plots) gateway.connectToPlot(address)
 }
 
 main()

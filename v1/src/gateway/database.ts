@@ -18,7 +18,7 @@ export class GatewayDatabase {
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS averages (
         id INTEGER PRIMARY KEY,
-        talhao_address TEXT NOT NULL,
+        plot_address TEXT NOT NULL,
         calculated_at TEXT NOT NULL,
         sample_count INTEGER NOT NULL,
         temperature REAL NOT NULL,
@@ -36,7 +36,7 @@ export class GatewayDatabase {
       .prepare(
         `
       INSERT INTO averages
-        (talhao_address, calculated_at, sample_count,
+        (plot_address, calculated_at, sample_count,
          temperature, temperature_unit, humidity, humidity_unit, rainfall, rainfall_unit)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
