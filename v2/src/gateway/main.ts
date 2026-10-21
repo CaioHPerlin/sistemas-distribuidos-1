@@ -140,8 +140,7 @@ function main(): void {
   const usage = 'Uso: gateway --service=<[host:]porta> --lots=<[host:]porta,...> [--batch-size=5]'
   if (!service || !lotsText || !Number.isInteger(batchSize) || batchSize < 1) {
     console.error(usage)
-    process.exitCode = 1
-    return
+    process.exit(1)
   }
 
   const talhoes: Address[] = []
