@@ -20,8 +20,7 @@ function main(): void {
     intervalMs < 100
   ) {
     console.error('Uso: sensors --port=<porta> [--interval-ms=<milissegundos, mínimo 100>]')
-    process.exitCode = 1
-    return
+    process.exit(1)
   }
 
   const temperature = new TemperatureSensor()

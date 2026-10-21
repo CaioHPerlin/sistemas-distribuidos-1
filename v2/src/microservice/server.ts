@@ -36,8 +36,7 @@ function main(): void {
   const port = Number(args.port)
   if (!Number.isInteger(port) || port < 1 || port > 65535) {
     console.error('Uso: microservice [--port=<porta, padrão 4000>]')
-    process.exitCode = 1
-    return
+    process.exit(1)
   }
 
   const server = createServer((socket) => {
