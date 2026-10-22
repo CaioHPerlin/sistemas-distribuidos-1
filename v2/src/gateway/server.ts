@@ -5,19 +5,17 @@ function main(): void {
   const { values } = parseArgs({
     options: {
       port: { type: 'string' },
-      'interval-s': { type: 'string', default: '10' },
     },
   })
 
   const port = Number(values.port)
-  const intervalSeconds = Number(values['interval-s'])
 
-  //   if (!Number.isInteger(port) || port < 1 || port > 65535 || !Number.isInteger(intervalSeconds)) {
-  //     console.error('Uso: gateway --port=<porta> [--interval-s=<intervalo de envio para a FOG>]')
-  //     process.exit(1)
-  //   }
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    console.error('Uso: gateway --port=<porta> [--interval-s=<intervalo de envio para a FOG>]')
+    process.exit(1)
+  }
 
-  //   let client: Socket | undefined
+  let client: Socket | undefined
 
   //   const server = createServer((socket) => {
   //     if (client) {
