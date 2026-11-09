@@ -28,5 +28,9 @@
     "@types/node": "^22.20.4",
     "prettier": "^3.9.10",
     "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.14.7",
+    "@grpc/proto-loader": "^0.8.1"
   }
 }
