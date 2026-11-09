@@ -1,30 +1,31 @@
-import { createServer } from 'node:net'
+import * as grpc from '@grpc/grpc-js'
 import { parseArgs } from 'node:util'
+import { AverageService, type AverageServiceHandlers } from '../rpc/average-service.js'
 
-/** Cada grupo de números produz uma média na mesma posição da resposta. */
-export interface Input {
-  groups: number[][]
-}
-
-export interface Output {
-  averages: number[]
-}
-
-function isInput(value: unknown): value is Input {
-  if (!value || typeof value !== 'object') return false
-  const input = value as Partial<Input>
-  return (
-    Array.isArray(input.groups) &&
-    input.groups.length > 0 &&
-    input.groups.every(
-      (group) => Array.isArray(group) && group.length > 0 && group.every(Number.isFinite),
-    )
-  )
-}
+export type { Input, Output } from '../rpc/average-service.js'
 
 function average(values: number[]): number {
   const mean = values.reduce((total, value) => total + value, 0) / values.length
   return Number(mean.toFixed(2))
+}
+
+const handlers: AverageServiceHandlers = {
+  Calculate(call, callback) {
+    const groups = call.request.groups.map((group) => group.values)
+    const valid =
+      groups.length > 0 &&
+      groups.every((values) => values.length > 0 && values.every(Number.isFinite))
+
+    if (!valid) {
+      callback({
+        code: grpc.status.INVALID_ARGUMENT,
+        message: 'groups deve conter ao menos um grupo e cada grupo, números finitos',
+      })
+      return
+    }
+
+    callback(null, { averages: groups.map(average) })
+  },
 }
 
 function main(): void {
@@ -39,31 +40,19 @@ function main(): void {
     process.exit(1)
   }
 
-  const server = createServer((socket) => {
-    socket.on('data', (data: Buffer) => {
-      let message: unknown
-      try {
-        message = JSON.parse(data.toString('utf8'))
-      } catch {
-        message = undefined
-      }
-
-      if (!isInput(message)) {
-        socket.end()
-        return
-      }
-
-      const response: Output = { averages: message.groups.map(average) }
-      socket.end(JSON.stringify(response))
-    })
-    socket.on('error', (error) => console.error(`[médias] ${error.message}`))
+  const server = new grpc.Server()
+  server.addService(
+    AverageService.service,
+    handlers as unknown as grpc.UntypedServiceImplementation,
+  )
+  server.bindAsync(`0.0.0.0:${port}`, grpc.ServerCredentials.createInsecure(), (error) => {
+    if (error) {
+      console.error(`[médias] ${error.message}`)
+      process.exitCode = 1
+      return
+    }
+    console.log(`[médias] ouvindo na porta ${port}`)
   })
-
-  server.on('error', (error) => {
-    console.error(`[médias] ${error.message}`)
-    process.exitCode = 1
-  })
-  server.listen(port, () => console.log(`[médias] ouvindo na porta ${port}`))
 }
 
 main()
