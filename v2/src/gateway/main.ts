@@ -68,6 +68,8 @@ class GatewayClient {
       this.readings.set(label, recent)
       if (recent.length === 0) continue
       const readings = recent.map((entry) => entry.value)
+      const first = readings[0]
+      if (!first) continue
       try {
         const response = await calculate(this.service, {
           groups: [
@@ -86,7 +88,7 @@ class GatewayClient {
           humidity: humidity as number,
           rainfall: rainfall as number,
         }
-        this.database.save(label, readings.length, averages, readings[0]!.units)
+        this.database.save(label, readings.length, averages, first.units)
         log('Gateway', 'Client', label, `Médias de ${readings.length} leituras gravadas`)
       } catch (error) {
         logError('Gateway', 'Client', label, error)
