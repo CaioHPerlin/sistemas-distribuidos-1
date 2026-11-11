@@ -7,7 +7,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "start:plots": "node dist/sensors/server.js",
+    "start:plots": "node dist/sensors/main.js",
     "start:gateway": "node dist/gateway/main.js",
     "start:microservice": "node dist/microservice/server.js",
     "start:anomaly": "node dist/anomaly-service/main.js",
