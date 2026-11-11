@@ -1,5 +1,4 @@
 import * as grpc from '@grpc/grpc-js'
-import { parseArgs } from 'node:util'
 import { log, logError } from '../common/logger.js'
 import { AnomalyService, type Input, type Output } from './service.js'
 
@@ -17,34 +16,7 @@ export function detect(input: Input, limits: Limits): Output {
   }
 }
 
-function main(): void {
-  const { values } = parseArgs({
-    options: {
-      port: { type: 'string', default: '4100' },
-      'temperature-max': { type: 'string', default: '35' },
-      'humidity-min': { type: 'string', default: '30' },
-      'rainfall-max': { type: 'string', default: '40' },
-    },
-  })
-  const port = Number(values.port)
-  const limits: Limits = {
-    temperatureMax: Number(values['temperature-max']),
-    humidityMin: Number(values['humidity-min']),
-    rainfallMax: Number(values['rainfall-max']),
-  }
-  if (
-    !Number.isInteger(port) ||
-    port < 1 ||
-    port > 65535 ||
-    !Object.values(limits).every(Number.isFinite)
-  ) {
-    console.error(
-      'Uso: anomaly-service [--port=4100] [--temperature-max=35] [--humidity-min=30] [--rainfall-max=40]',
-    )
-    process.exitCode = 1
-    return
-  }
-
+export function startAnomalyServer(port: number, limits: Limits): void {
   const server = new grpc.Server()
   server.addService(AnomalyService.service, {
     Check: (call: grpc.ServerUnaryCall<Input, Output>, callback: grpc.sendUnaryData<Output>) => {
@@ -65,5 +37,3 @@ function main(): void {
     log('AnomalyService', 'Server', `0.0.0.0:${port}`, 'Ouvindo')
   })
 }
-
-main()
