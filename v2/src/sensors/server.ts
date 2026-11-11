@@ -1,5 +1,6 @@
 import { createServer, type Socket } from 'node:net'
 import { parseArgs } from 'node:util'
+import { log, logError } from '../common/logger.js'
 import { HumiditySensor, RainGaugeSensor, TemperatureSensor } from './sensors.js'
 import type { SensorReading } from './protocol.js'
 
@@ -38,16 +39,16 @@ function main(): void {
     socket.on('close', () => {
       client = undefined
     })
-    socket.on('error', (error) => console.error(`[talhão:${port}] ${error.message}`))
+    socket.on('error', (error) => logError('Plot', 'Server', `0.0.0.0:${port}`, error))
   })
 
   server.on('error', (error) => {
-    console.error(`[talhão:${port}] ${error.message}`)
+    logError('Plot', 'Server', `0.0.0.0:${port}`, error)
     process.exitCode = 1
   })
 
   server.listen(port, () => {
-    console.log(`[talhão:${port}] ouvindo na porta ${port}`)
+    log('Plot', 'Server', `0.0.0.0:${port}`, 'Ouvindo')
     setInterval(() => {
       if (!client) return
 

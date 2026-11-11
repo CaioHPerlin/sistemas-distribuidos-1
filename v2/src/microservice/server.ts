@@ -1,5 +1,6 @@
 import * as grpc from '@grpc/grpc-js'
 import { parseArgs } from 'node:util'
+import { log, logError } from '../common/logger.js'
 import { AverageService, type AverageServiceHandlers } from '../rpc/average-service.js'
 
 export type { Input, Output } from '../rpc/average-service.js'
@@ -47,11 +48,11 @@ function main(): void {
   )
   server.bindAsync(`0.0.0.0:${port}`, grpc.ServerCredentials.createInsecure(), (error) => {
     if (error) {
-      console.error(`[médias] ${error.message}`)
+      logError('AverageService', 'Server', `0.0.0.0:${port}`, error)
       process.exitCode = 1
       return
     }
-    console.log(`[médias] ouvindo na porta ${port}`)
+    log('AverageService', 'Server', `0.0.0.0:${port}`, 'Ouvindo')
   })
 }
 
