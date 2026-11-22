@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package anomalies;
+
+service AnomalyService {
+  rpc Check (CheckRequest) returns (CheckResponse);
+}
+
+message CheckRequest {
+  double temperature = 1;
+  double humidity = 2;
+  double rainfall = 3;
+}
+
+message CheckResponse {
+  bool high_temperature = 1;
+  bool low_humidity = 2;
+  bool heavy_rainfall = 3;
+}
