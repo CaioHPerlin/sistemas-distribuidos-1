@@ -1,0 +1,29 @@
+services:
+  plot:
+    build: ..
+    command: ["node", "dist/sensors/main.js", "--port=5001", "--interval-ms=300"]
+
+  average:
+    build: ..
+    command: ["node", "dist/microservice/server.js", "--port=4000"]
+
+  anomaly:
+    build: ..
+    command: ["node", "dist/anomaly-service/main.js", "--port=4100", "--temperature-max=0"]
+
+  gateway:
+    build: ..
+    command:
+      - node
+      - dist/gateway/main.js
+      - --lots=plot:5001
+      - --service=average:4000
+      - --port=8080
+      - --window-ms=1500
+      - --publish-ms=1500
+    depends_on: [plot, average]
+
+  fog:
+    build: ..
+    command: ["node", "dist/fog/main.js", "--gateways=gateway:8080", "--anomaly=anomaly:4100"]
+    depends_on: [gateway, anomaly]
