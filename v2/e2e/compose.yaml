@@ -1,7 +1,27 @@
 services:
-  plot:
+  plot-a1:
     build: ..
     command: ["node", "dist/sensors/main.js", "--port=5001", "--interval-ms=300"]
+
+  plot-a2:
+    build: ..
+    command: ["node", "dist/sensors/main.js", "--port=5002", "--interval-ms=300"]
+
+  plot-a3:
+    build: ..
+    command: ["node", "dist/sensors/main.js", "--port=5003", "--interval-ms=300"]
+
+  plot-b1:
+    build: ..
+    command: ["node", "dist/sensors/main.js", "--port=5001", "--interval-ms=300"]
+
+  plot-b2:
+    build: ..
+    command: ["node", "dist/sensors/main.js", "--port=5002", "--interval-ms=300"]
+
+  plot-b3:
+    build: ..
+    command: ["node", "dist/sensors/main.js", "--port=5003", "--interval-ms=300"]
 
   average:
     build: ..
@@ -11,19 +31,35 @@ services:
     build: ..
     command: ["node", "dist/anomaly-service/main.js", "--port=4100", "--temperature-max=0"]
 
-  gateway:
+  gateway-a:
     build: ..
     command:
       - node
       - dist/gateway/main.js
-      - --lots=plot:5001
+      - --lots=plot-a1:5001,plot-a2:5002,plot-a3:5003
       - --service=average:4000
       - --port=8080
       - --window-ms=1500
       - --publish-ms=1500
-    depends_on: [plot, average]
+    depends_on: [plot-a1, plot-a2, plot-a3, average]
+
+  gateway-b:
+    build: ..
+    command:
+      - node
+      - dist/gateway/main.js
+      - --lots=plot-b1:5001,plot-b2:5002,plot-b3:5003
+      - --service=average:4000
+      - --port=8080
+      - --window-ms=1500
+      - --publish-ms=1500
+    depends_on: [plot-b1, plot-b2, plot-b3, average]
 
   fog:
     build: ..
-    command: ["node", "dist/fog/main.js", "--gateways=gateway:8080", "--anomaly=anomaly:4100"]
-    depends_on: [gateway, anomaly]
+    command:
+      - node
+      - dist/fog/main.js
+      - --gateways=gateway-a:8080,gateway-b:8080
+      - --anomaly=anomaly:4100
+    depends_on: [gateway-a, gateway-b, anomaly]
