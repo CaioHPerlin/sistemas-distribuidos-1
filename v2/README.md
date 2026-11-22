@@ -17,6 +17,8 @@ pnpm run start:fog -- --gateways=8080 --anomaly=4100
 
 O gateway tenta reconectar a talhões que ainda não subiram. Outro gateway pode usar `--lots=5003 --port=8081`; inclua `8081` em `--gateways=8080,8081` na FOG. Endereços sem host usam `127.0.0.1`.
 
+Para testar o fluxo em cinco containers isolados (talhão, médias, gateway, FOG e anomalias), com Docker Compose disponível, execute `bash e2e/run.sh` dentro de `v2/`. O teste confirma uma média no SQLite do gateway e um alerta na FOG com `plot:5001`; os containers são removidos ao terminar.
+
 `--window-ms` define quantos milissegundos anteriores a cada cálculo contam para a média; `--publish-ms` define a cadência do cálculo e da gravação. O servidor do gateway transmite novos registros do SQLite à FOG nessa mesma cadência. Uma janela sem leituras não gera registro. Janelas se sobrepõem quando `window-ms` é maior que `publish-ms`. O antigo `--batch-size` foi substituído por esses parâmetros temporais.
 
 O comando `start:gateway` inicia cliente e servidor juntos. `--client-only` desliga o servidor; `--server-only` desliga o cliente. Nos dois casos, `--lots` seleciona o mesmo banco `data/gateway-<portas>.sqlite`; em modo cliente, `--service` é obrigatório. O servidor usa `--port=8080` por padrão. Para separar os papéis em dois processos, inicie ambos com a mesma lista de talhões, um com `--client-only` e outro com `--server-only`.
