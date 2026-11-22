@@ -15,9 +15,9 @@ pnpm run start:gateway -- --lots=5001,5002 --service=4000 --port=8080 --window-m
 pnpm run start:fog -- --gateways=8080 --anomaly=4100
 ```
 
-O gateway tenta reconectar a talhões que ainda não subiram. Outro gateway pode usar `--lots=5003 --port=8081`; inclua `8081` em `--gateways=8080,8081` na FOG. Endereços sem host usam `127.0.0.1`.
+O gateway tenta reconectar a talhões que ainda não subiram. Outro gateway pode usar `--lots=5003 --service=4000 --port=8081`; inclua `8081` em `--gateways=8080,8081` na FOG. Endereços sem host usam `127.0.0.1`.
 
-Para testar o fluxo em cinco containers isolados (talhão, médias, gateway, FOG e anomalias), com Docker Compose disponível, execute `bash e2e/run.sh` dentro de `v2/`. O teste confirma uma média no SQLite do gateway e um alerta na FOG com `plot:5001`; os containers são removidos ao terminar.
+Para testar o desenho completo com Docker Compose, execute `bash e2e/run.sh` dentro de `v2/`. O teste sobe 11 containers isolados: seis talhões (três por gateway), dois gateways, a FOG e os serviços de médias e anomalias. Confirma que cada SQLite contém apenas os três talhões do respectivo gateway e que a FOG registra seis alertas com gateway e talhão corretos. Os containers e a rede são removidos ao terminar.
 
 `--window-ms` define quantos milissegundos anteriores a cada cálculo contam para a média; `--publish-ms` define a cadência do cálculo e da gravação. O servidor do gateway transmite novos registros do SQLite à FOG nessa mesma cadência. Uma janela sem leituras não gera registro. Janelas se sobrepõem quando `window-ms` é maior que `publish-ms`. O antigo `--batch-size` foi substituído por esses parâmetros temporais.
 
