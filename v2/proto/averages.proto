@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package averages;
+
+service AverageService {
+  rpc Calculate (CalculateRequest) returns (CalculateResponse);
+}
+
+message NumberGroup {
+  repeated double values = 1;
+}
+
+message CalculateRequest {
+  repeated NumberGroup groups = 1;
+}
+
+message CalculateResponse {
+  repeated double averages = 1;
+}

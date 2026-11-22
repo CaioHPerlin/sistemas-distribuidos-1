@@ -1,6 +1,13 @@
 import { createConnection } from 'node:net'
 import { parseArgs } from 'node:util'
-import type { Input, Output } from '../microservice/server.js'
+import * as grpc from '@grpc/grpc-js'
+import {
+  AverageService,
+  calculate,
+  type AverageServiceClient,
+  type Input,
+  type Output,
+} from '../rpc/average-service.js'
 import type { SensorReading } from '../sensors/protocol.js'
 import { isSensorReading } from '../sensors/protocol.js'
 import { GatewayDatabase, type Averages } from './database.js'
@@ -12,13 +19,19 @@ interface Address {
 
 class Gateway {
   private readonly batches = new Map<string, SensorReading[]>()
+  private readonly client: AverageServiceClient
 
   constructor(
     private readonly ports: string,
     private readonly service: Address,
     private readonly batchSize: number,
     private readonly database: GatewayDatabase,
-  ) {}
+  ) {
+    this.client = new AverageService(
+      `${service.host}:${service.port}`,
+      grpc.credentials.createInsecure(),
+    )
+  }
 
   connectToPlot(address: Address): void {
     const label = `${address.host}:${address.port}`
@@ -56,10 +69,10 @@ class Gateway {
     if (batch.length < this.batchSize) return
 
     this.batches.set(label, [])
-    this.requestAverages(label, batch)
+    void this.requestAverages(label, batch)
   }
 
-  private requestAverages(label: string, readings: SensorReading[]): void {
+  private async requestAverages(label: string, readings: SensorReading[]): Promise<void> {
     const first = readings[0]
     if (!first) return
 
@@ -70,51 +83,39 @@ class Gateway {
         readings.map((reading) => reading.rainfall),
       ],
     }
-    const socket = createConnection(this.service)
-    socket.on('connect', () => socket.write(JSON.stringify(request)))
-    socket.on('data', (data: Buffer) => {
-      let response: Output
-      try {
-        response = JSON.parse(data.toString('utf8')) as Output
-      } catch {
-        console.error(`[gateway:${this.ports}] resposta inválida do serviço`)
-        socket.destroy()
-        return
-      }
 
-      if (!response || !Array.isArray(response.averages)) {
-        console.error(`[gateway:${this.ports}] resposta inválida do serviço`)
-        socket.destroy()
-        return
-      }
+    let response: Output
+    try {
+      response = await calculate(this.client, request)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      console.error(`[gateway:${this.ports}] médias: ${message}`)
+      return
+    }
 
-      const [temperature, humidity, rainfall] = response.averages
-      if (
-        typeof temperature !== 'number' ||
-        typeof humidity !== 'number' ||
-        typeof rainfall !== 'number'
-      ) {
-        console.error(`[gateway:${this.ports}] resposta inválida do serviço`)
-        socket.destroy()
-        return
-      }
+    const [temperature, humidity, rainfall] = response.averages
+    if (
+      typeof temperature !== 'number' ||
+      typeof humidity !== 'number' ||
+      typeof rainfall !== 'number'
+    ) {
+      console.error(`[gateway:${this.ports}] resposta inválida do serviço`)
+      return
+    }
 
-      const averages: Averages = { temperature, humidity, rainfall }
+    const averages: Averages = { temperature, humidity, rainfall }
 
-      try {
-        this.database.save(label, readings.length, averages, first.units)
-        console.log(
-          `[gateway:${this.ports}] talhão ${label}: ${readings.length} leituras, ` +
-            `${averages.temperature} ${first.units.temperature}, ` +
-            `${averages.humidity} ${first.units.humidity}, ` +
-            `${averages.rainfall} ${first.units.rainfall}`,
-        )
-      } catch (error) {
-        console.error(`[gateway:${this.ports}] erro ao salvar: ${error}`)
-      }
-      socket.destroy()
-    })
-    socket.on('error', (error) => console.error(`[gateway:${this.ports}] médias: ${error.message}`))
+    try {
+      this.database.save(label, readings.length, averages, first.units)
+      console.log(
+        `[gateway:${this.ports}] talhão ${label}: ${readings.length} leituras, ` +
+          `${averages.temperature} ${first.units.temperature}, ` +
+          `${averages.humidity} ${first.units.humidity}, ` +
+          `${averages.rainfall} ${first.units.rainfall}`,
+      )
+    } catch (error) {
+      console.error(`[gateway:${this.ports}] erro ao salvar: ${error}`)
+    }
   }
 }
 
