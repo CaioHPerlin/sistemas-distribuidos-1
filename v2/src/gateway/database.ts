@@ -9,6 +9,16 @@ export interface Averages {
   rainfall: number
 }
 
+export interface AverageRecord extends Averages {
+  id: number
+  plot_address: string
+  calculated_at: string
+  sample_count: number
+  temperature_unit: string
+  humidity_unit: string
+  rainfall_unit: string
+}
+
 export class GatewayDatabase {
   private readonly db: DatabaseSync
 
@@ -52,5 +62,18 @@ export class GatewayDatabase {
         averages.rainfall,
         units.rainfall,
       )
+  }
+
+  latestId(): number {
+    const row = this.db.prepare('SELECT COALESCE(MAX(id), 0) AS id FROM averages').get() as {
+      id: number
+    }
+    return row.id
+  }
+
+  since(id: number): AverageRecord[] {
+    return this.db
+      .prepare('SELECT * FROM averages WHERE id > ? ORDER BY id')
+      .all(id) as unknown as AverageRecord[]
   }
 }

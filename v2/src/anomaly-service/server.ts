@@ -1,5 +1,6 @@
 import * as grpc from '@grpc/grpc-js'
 import { parseArgs } from 'node:util'
+import { log, logError } from '../common/logger.js'
 import { AnomalyService, type Input, type Output } from './service.js'
 
 export interface Limits {
@@ -32,10 +33,14 @@ function main(): void {
     rainfallMax: Number(values['rainfall-max']),
   }
   if (
-    !Number.isInteger(port) || port < 1 || port > 65535 ||
+    !Number.isInteger(port) ||
+    port < 1 ||
+    port > 65535 ||
     !Object.values(limits).every(Number.isFinite)
   ) {
-    console.error('Uso: anomaly-service [--port=4100] [--temperature-max=35] [--humidity-min=30] [--rainfall-max=40]')
+    console.error(
+      'Uso: anomaly-service [--port=4100] [--temperature-max=35] [--humidity-min=30] [--rainfall-max=40]',
+    )
     process.exitCode = 1
     return
   }
@@ -53,11 +58,11 @@ function main(): void {
   })
   server.bindAsync(`0.0.0.0:${port}`, grpc.ServerCredentials.createInsecure(), (error) => {
     if (error) {
-      console.error(`[AnomalyService::Server][0.0.0.0:${port}] ${error.message}`)
+      logError('AnomalyService', 'Server', `0.0.0.0:${port}`, error)
       process.exitCode = 1
       return
     }
-    console.log(`[AnomalyService::Server][0.0.0.0:${port}] Ouvindo`)
+    log('AnomalyService', 'Server', `0.0.0.0:${port}`, 'Ouvindo')
   })
 }
 
