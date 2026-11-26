@@ -7,12 +7,12 @@ Cada talhão é um servidor TCP que envia leituras ao gateway conectado. O gatew
 Requer Node.js 24.15 ou superior. Execute `pnpm install` e `pnpm run build` dentro de `v2/`. Depois, em terminais separados:
 
 ```bash
-pnpm run start:microservice -- --port=4000
-pnpm run start:anomaly -- --port=4100
-pnpm run start:plots -- --port=5001
-pnpm run start:plots -- --port=5002
-pnpm run start:gateway -- --lots=5001,5002 --service=4000 --port=8080 --window-ms=5000 --publish-ms=5000
-pnpm run start:fog -- --gateways=8080 --anomaly=4100
+pnpm run start:microservice --port=4000
+pnpm run start:anomaly --port=4100
+pnpm run start:plots --port=5001
+pnpm run start:plots --port=5002
+pnpm run start:gateway --lots=5001,5002 --service=4000 --port=8080 --window-ms=5000 --publish-ms=5000
+pnpm run start:fog --gateways=8080 --anomaly=4100
 ```
 
 O gateway tenta reconectar a talhões que ainda não subiram. Outro gateway pode usar `--lots=5003 --service=4000 --port=8081`; inclua `8081` em `--gateways=8080,8081` na FOG. Endereços sem host usam `127.0.0.1`.
@@ -28,7 +28,7 @@ O comando `start:gateway` inicia cliente e servidor juntos. `--client-only` desl
 O serviço sinaliza temperatura acima de **35 °C**, umidade abaixo de **30%** ou chuva acima de **40 mm/h**. Ajuste apenas os limites existentes, por exemplo:
 
 ```bash
-pnpm run start:anomaly -- --port=4100 --temperature-max=36 --humidity-min=35 --rainfall-max=45
+pnpm run start:anomaly --port=4100 --temperature-max=36 --humidity-min=35 --rainfall-max=45
 ```
 
 A FOG preserva `plot_address` do registro do gateway enquanto aguarda a resposta gRPC; assim um alerta identifica o talhão mesmo que vários gateways e talhões sejam analisados simultaneamente. A FOG se conecta ao gateway, nunca o contrário. Novas conexões recebem somente registros futuros; não há replay após desconexão.
@@ -41,10 +41,10 @@ Em máquinas diferentes, instale e compile `v2/` em cada uma. Abra as portas TCP
 
 ```bash
 # Gateway: talhões e serviço de médias remotos
-pnpm run start:gateway -- --lots=192.168.1.21:5001,192.168.1.22:5002 --service=192.168.1.30:4000 --port=8080
+pnpm run start:gateway --lots=192.168.1.21:5001,192.168.1.22:5002 --service=192.168.1.30:4000 --port=8080
 
 # FOG: gateway e serviço de anomalias remotos
-pnpm run start:fog -- --gateways=192.168.1.40:8080 --anomaly=192.168.1.50:4100
+pnpm run start:fog --gateways=192.168.1.40:8080 --anomaly=192.168.1.50:4100
 ```
 
 Os logs seguem `[Módulo::Client|Server][endereço] Mensagem`. Cada processo escreve em seu próprio stdout, mas todos usam o mesmo formatador. Como na v1, o fluxo dos sensores usa JSON diretamente por evento `data` para manter o exemplo acadêmico simples; o fluxo contínuo gateway–FOG usa linhas para delimitar mensagens TCP corretamente.

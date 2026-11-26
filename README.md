@@ -24,12 +24,12 @@ pnpm run build
 Em terminais separados, sempre dentro da mesma pasta de versão, inicie o serviço de médias, um talhão e um gateway:
 
 ```bash
-pnpm run start:microservice -- --port=4000
-pnpm run start:plots -- --port=5001
-pnpm run start:gateway -- --service=4000 --lots=5001
+pnpm run start:microservice --port=4000
+pnpm run start:plots --port=5001
+pnpm run start:gateway --service=4000 --lots=5001
 ```
 
-Na `v2/`, inicie também `pnpm run start:anomaly -- --port=4100` e `pnpm run start:fog -- --gateways=8080 --anomaly=4100` para completar o fluxo. Consulte o README de cada versão para parâmetros e exemplos em máquinas diferentes. Use portas distintas se executar as duas versões simultaneamente.
+Na `v2/`, inicie também `pnpm run start:anomaly --port=4100` e `pnpm run start:fog --gateways=8080 --anomaly=4100` para completar o fluxo. Consulte o README de cada versão para parâmetros e exemplos em máquinas diferentes. Use portas distintas se executar as duas versões simultaneamente.
 
 ## Desenvolvimento e registros locais
 
