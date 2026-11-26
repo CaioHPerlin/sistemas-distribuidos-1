@@ -1,7 +1,7 @@
 import { createConnection } from 'node:net'
 import * as grpc from '@grpc/grpc-js'
 import { log, logError } from '../common/logger.js'
-import { AverageService, calculate, type AverageServiceClient } from '../rpc/average-service.js'
+import { AverageService, calculate, type AverageServiceClient } from '../microservice/service.js'
 import { isSensorReading, type SensorReading } from '../sensors/protocol.js'
 import { GatewayDatabase, type Averages } from './database.js'
 

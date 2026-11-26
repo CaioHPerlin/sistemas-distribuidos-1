@@ -1,9 +1,6 @@
 import * as grpc from '@grpc/grpc-js'
-import { parseArgs } from 'node:util'
 import { log, logError } from '../common/logger.js'
-import { AverageService, type AverageServiceHandlers } from '../rpc/average-service.js'
-
-export type { Input, Output } from '../rpc/average-service.js'
+import { AverageService, type AverageServiceHandlers } from './service.js'
 
 function average(values: number[]): number {
   const mean = values.reduce((total, value) => total + value, 0) / values.length
@@ -29,18 +26,7 @@ const handlers: AverageServiceHandlers = {
   },
 }
 
-function main(): void {
-  const { values: args } = parseArgs({
-    options: {
-      port: { type: 'string', default: '4000' },
-    },
-  })
-  const port = Number(args.port)
-  if (!Number.isInteger(port) || port < 1 || port > 65535) {
-    console.error('Uso: microservice [--port=<porta, padrão 4000>]')
-    process.exit(1)
-  }
-
+export function startAverageServer(port: number): void {
   const server = new grpc.Server()
   server.addService(
     AverageService.service,
@@ -55,5 +41,3 @@ function main(): void {
     log('AverageService', 'Server', `0.0.0.0:${port}`, 'Ouvindo')
   })
 }
-
-main()

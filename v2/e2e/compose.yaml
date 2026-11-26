@@ -25,7 +25,7 @@ services:
 
   average:
     build: ..
-    command: ["node", "dist/microservice/server.js", "--port=4000"]
+    command: ["node", "dist/microservice/main.js", "--port=4000"]
 
   anomaly:
     build: ..
